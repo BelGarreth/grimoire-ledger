@@ -2088,7 +2088,7 @@ function pbOpen(){
  const m=document.createElement('div');m.className='pbmask';m.id='pbMask';
  const SW=['#c0392b','#d35400','#d4ac0d','#1e8449','#2980b9','#6c3483','#7f8c8d','#000000'];
  m.innerHTML=`<div class="pbm" role="dialog" aria-label="Post composer"><div class="pbh"><h2>Post</h2>
- <select id="pbTpl" title="Insert a template"></select><button class="btn sm" id="pbSaveTpl">Save as template</button>
+ <select id="pbTpl" title="Insert a template"></select><button class="btn sm" id="pbSaveTpl">Save as template</button><select id="pbDelTpl" title="Delete a saved template"></select>
  <label class="note" style="margin:0">Round <input type="text" id="pbRound" class="n s" value="${esc(PB.round)}"></label><span class="sp"></span>
  <button class="btn sm" id="pbCopyBB">Copy BBCode</button><button class="btn sm" id="pbCopyMD">Copy Discord</button><button class="btn sm" id="pbHook" title="Send to the Discord webhook in settings">Post</button>
  <button class="btn sm" id="pbGear" title="Roll syntax and webhook">⚙</button><button class="btn sm x" id="pbClose" title="Close">×</button></div>
@@ -2099,7 +2099,9 @@ function pbOpen(){
  const ta=m.querySelector('#pbTa'),prev=m.querySelector('#pbPrev'),pick=m.querySelector('#pbPick');ta.value=PB.text;
  const sync=()=>{PB.text=ta.value;try{localStorage.setItem('grimoire-post-draft',PB.text)}catch(e){}prev.innerHTML=pbToHTML(ta.value)||'<span class="mute">The preview appears here.</span>'};
  const tplSel=m.querySelector('#pbTpl');
- const fillTpl=()=>{tplSel.innerHTML='<option value="">Template…</option>'+PB_TPL.map((t,i)=>`<option value="b${i}">${esc(t.name)}</option>`).join('')+(C.postTpl||[]).map((t,i)=>`<option value="s${i}">${esc(t.name)} (saved)</option>`).join('')};fillTpl();
+ const delSel=m.querySelector('#pbDelTpl');
+ const fillTpl=()=>{const sv=C.postTpl||[];tplSel.innerHTML='<option value="">Template…</option>'+PB_TPL.map((t,i)=>`<option value="b${i}">${esc(t.name)}</option>`).join('')+sv.map((t,i)=>`<option value="s${i}">${esc(t.name)} (saved)</option>`).join('');delSel.innerHTML='<option value="">Delete saved…</option>'+sv.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join('');delSel.style.display=sv.length?'':'none'};fillTpl();
+ delSel.addEventListener('change',()=>{const i=delSel.value;delSel.value='';if(i==='')return;const t=(C.postTpl||[])[+i];if(!t||!confirm('Delete saved template "'+t.name+'"?'))return;C.postTpl.splice(+i,1);autosave();fillTpl();toast('Deleted template "'+t.name+'"')});
  const put=(text,sel)=>{const p=PB.pick;const s=p?p.start:ta.selectionStart,e=ta.selectionStart;const v=ta.value;ta.value=v.slice(0,s)+text+v.slice(e);let a=s+text.length,b=a;if(sel){const k=text.indexOf(sel);if(k>=0){a=s+k;b=a+sel.length}}ta.focus();ta.setSelectionRange(a,b);closePick();sync()};
  const wrap=(o,c)=>{const s=ta.selectionStart,e=ta.selectionEnd,v=ta.value;ta.value=v.slice(0,s)+o+v.slice(s,e)+c+v.slice(e);if(s!==e)ta.setSelectionRange(s+o.length,e+o.length);else ta.setSelectionRange(s+o.length,s+o.length);ta.focus();sync()};
  function closePick(){PB.pick=null;pick.style.display='none'}
