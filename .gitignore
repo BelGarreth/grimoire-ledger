@@ -1,3 +1,4 @@
 .DS_Store
 *.token
 *.pat
+.claude/settings.local.json
